@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>EMA Configuration Builder</title>
+
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    .section { border: 1px solid #ccc; padding: 20px; border-radius: 6px; margin-bottom: 30px; }
+    .ema-box { border: 1px solid #888; padding: 15px; border-radius: 6px; margin-top: 15px; background: #fafafa; }
+    .notif-box { border: 1px dashed #999; padding: 10px; margin-top: 10px; border-radius: 6px; }
+    button { margin-top: 10px; padding: 8px 14px; cursor: pointer; }
+    pre { background: #f0f0f0; padding: 10px; border-radius: 6px; white-space: pre-wrap; }
+    .remove-btn { background: #ffdddd; color: #aa0000; border: 1px solid red; }
+  </style>
+</head>
+
+<body>
+
+<h1>EMA Configuration Builder</h1>
+
+<!-- PROJECT INFO -->
+<div class="section">
+  <h2>1. Project Information</h2>
+
+  <div style="display: flex; gap: 20px; margin-bottom: 15px;">
+    <div style="flex: 1;">
+      <label>Contact Person</label><br>
+      <input id="contactPerson" type="text" style="width: 100%;" placeholder="Dr. Chan">
+    </div>
+
+    <div style="flex: 1;">
+      <label>Contact Number</label><br>
+      <input id="contactNumber" type="text" style="width: 100%;" placeholder="91234567">
+    </div>
+
+    <div style="flex: 1;">
+      <label>Project Title</label><br>
+      <input id="projectTitle" type="text" style="width: 100%;" placeholder="My Project">
+    </div>
+  </div>
+
+  <div style="margin-bottom: 15px;">
+    <label>Project Description</label><br>
+    <textarea id="projectDescription"
+              style="width: 100%; height: 120px; margin-top: 5px;"
+              placeholder="Describe the EMA study here..."></textarea>
+  </div>
+
+  <div style="margin-top: 10px;">
+    <label>Allow Edit</label><br>
+    <select id="allowEdit" style="margin-top: 5px;">
+      <option>true</option>
+      <option>false</option>
+    </select>
+  </div>
+
+  <div style="margin-top: 10px;">
+    <label>Show "I've Finished" Button</label><br>
+    <select id="closeFinish" style="margin-top: 5px;">
+      <option>true</option>
+      <option>false</option>
+    </select>
+  </div>
+
+  <div style="margin-top: 10px;">
+    <label>Display Progress Bar</label><br>
+    <select id="displayProgress" style="margin-top: 5px;">
+      <option>true</option>
+      <option>false</option>
+    </select>
+  </div>
+
+  <div style="margin-top: 10px;">
+    <label>Allow Revert Finished EMA</label><br>
+    <select id="allowRevert" style="margin-top: 5px;">
+      <option>true</option>
+      <option>false</option>
+    </select>
+  </div>
+
+</div>
+
+<!-- EMA SECTION -->
+<div class="section">
+  <h2>2. EMA Sessions</h2>
+  <div id="emaContainer"></div>
+  <button onclick="addEMA()">+ Add EMA</button>
+</div>
+
+<!-- EXPORT -->
+<div class="section">
+  <h2>3. Generate Configuration</h2>
+  <button onclick="generateConfig()">Generate & Download</button>
+  <button onclick="copyConfig()">📋 Copy to Clipboard</button>
+  <pre id="output"></pre>
+</div>
+
+<script>
+let emaCount = 0;
+
+/* -----------------------------------------------------
+   ADD EMA
+----------------------------------------------------- */
+function addEMA() {
+  emaCount++;
+
+  const box = document.createElement("div");
+  box.className = "ema-box";
+  box.setAttribute("data-ema-id", emaCount);
+
+  box.innerHTML = `
+    <h3>EMA ${emaCount}</h3>
+    <button class="remove-btn" onclick="removeEMA(${emaCount})">Remove this EMA</button>
+    <br><br>
+
+    <label>Label</label>
+    <input id="emaLabel_${emaCount}" type="text" style="width:100%;">
+
+    <label>Start (hours after commencement date)</label>
+    <input id="emaStart_${emaCount}" type="number" style="width:100%;">
+
+    <label>Duration (minutes)</label>
+    <input id="emaDuration_${emaCount}" type="number" style="width:100%;">
+
+    <label>Survey Link</label>
+    <input id="emaLink_${emaCount}" type="text" style="width:100%;">
+
+    <div id="notifContainer_${emaCount}"></div>
+
+    <button class="add-notif-btn" onclick="addNotification(${emaCount})">+ Add Notification</button>
+  `;
+
+  document.getElementById("emaContainer").appendChild(box);
+}
+
+/* -----------------------------------------------------
+   REMOVE EMA + REINDEX
+----------------------------------------------------- */
+function removeEMA(id) {
+  const elem = document.querySelector(`.ema-box[data-ema-id="${id}"]`);
+  if (elem) elem.remove();
+  rebuildEMAIds();
+}
+
+function rebuildEMAIds() {
+  const boxes = document.querySelectorAll(".ema-box");
+
+  emaCount = 0;
+  boxes.forEach((box, i) => {
+    emaCount = i + 1;
+    const id = emaCount;
+
+    box.setAttribute("data-ema-id", id);
+    box.querySelector("h3").textContent = `EMA ${id}`;
+    box.querySelector(".remove-btn").setAttribute("onclick", `removeEMA(${id})`);
+
+    renameField(box, "emaLabel", id);
+    renameField(box, "emaStart", id);
+    renameField(box, "emaDuration", id);
+    renameField(box, "emaLink", id);
+
+    const notifCont = box.querySelector(`[id^="notifContainer_"]`);
+    notifCont.id = `notifContainer_${id}`;
+
+    box.querySelector(".add-notif-btn")
+      .setAttribute("onclick", `addNotification(${id})`);
+
+    rebuildNotificationIds(id);
+  });
+}
+
+function renameField(box, prefix, id) {
+  let field = box.querySelector(`[id^="${prefix}_"]`);
+  if (field) field.id = `${prefix}_${id}`;
+}
+
+/* -----------------------------------------------------
+   NOTIFICATIONS
+----------------------------------------------------- */
+function addNotification(emaId) {
+  const container = document.getElementById(`notifContainer_${emaId}`);
+  if (!container) return;
+
+  const index = container.querySelectorAll(".notif-box").length + 1;
+
+  const box = document.createElement("div");
+  box.className = "notif-box";
+  box.setAttribute("data-notif-id", index);
+
+  box.innerHTML = `
+    <button class="remove-btn" onclick="removeNotification(${emaId}, ${index})">Remove</button>
+    <label>Message</label>
+    <input id="notifMsg_${emaId}_${index}" type="text">
+    <label>Minutes After Start</label>
+    <input id="notifMin_${emaId}_${index}" type="number">
+  `;
+
+  container.appendChild(box);
+}
+
+function removeNotification(emaId, notifId) {
+  const container = document.getElementById(`notifContainer_${emaId}`);
+  const target = container.querySelector(`.notif-box[data-notif-id="${notifId}"]`);
+  if (target) target.remove();
+  rebuildNotificationIds(emaId);
+}
+
+function rebuildNotificationIds(emaId) {
+  const container = document.getElementById(`notifContainer_${emaId}`);
+  const boxes = container.querySelectorAll(".notif-box");
+
+  boxes.forEach((box, i) => {
+    const id = i + 1;
+    box.setAttribute("data-notif-id", id);
+    box.querySelector(`[id^="notifMsg_"]`).id = `notifMsg_${emaId}_${id}`;
+    box.querySelector(`[id^="notifMin_"]`).id = `notifMin_${emaId}_${id}`;
+    box.querySelector(".remove-btn")
+      .setAttribute("onclick", `removeNotification(${emaId}, ${id})`);
+  });
+}
+
+/* -----------------------------------------------------
+   GENERATE CONFIG
+----------------------------------------------------- */
+function generateConfig() {
+  let out = "";
+
+  out += `var contact_Person = "${contactPerson.value}";\n`;
+  out += `var contact_Number = "${contactNumber.value}";\n`;
+  out += `var project_Title = "${projectTitle.value}";\n`;
+  out += `var project_Description = "${projectDescription.value.replace(/\n/g, "\\n")}";\n\n`;
+
+  out += `var allow_Edit = ${allowEdit.value};\n`;
+  out += `var close_Finish = ${closeFinish.value};\n`;
+  out += `var display_Progress = ${displayProgress.value};\n`;
+  out += `var allow_Revert = ${allowRevert.value};\n\n`;
+
+  let emaVars = [];
+
+  for (let i = 1; i <= emaCount; i++) {
+    const label = document.getElementById(`emaLabel_${i}`).value;
+    const start = document.getElementById(`emaStart_${i}`).value;
+    const duration = document.getElementById(`emaDuration_${i}`).value;
+    const link = document.getElementById(`emaLink_${i}`).value;
+
+    let block = `var EMA${i} = {\n`;
+    block += `  start: ${start},\n`;
+    block += `  duration: ${duration},\n`;
+    block += `  label: "${label}",\n`;
+    block += `  link: "${link}",\n`;
+    block += `  notification: [\n`;
+
+    const notifBoxes = document.getElementById(`notifContainer_${i}`).querySelectorAll(".notif-box");
+    notifBoxes.forEach((box, idx) => {
+      const msg = box.querySelector(`[id^="notifMsg_"]`).value;
+      const min = box.querySelector(`[id^="notifMin_"]`).value;
+      block += `    { content: "${msg}", minutes: ${min} }`;
+      if (idx < notifBoxes.length - 1) block += ",";
+      block += "\n";
+    });
+
+    block += "  ]\n};\n\n";
+    out += block;
+    emaVars.push(`EMA${i}`);
+  }
+
+  out += `var EMA_sequence = [${emaVars.join(", ")}];\n`;
+
+  document.getElementById("output").textContent = out;
+
+  const blob = new Blob([out], { type: "text/javascript" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "ema-config.txt";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function copyConfig() {
+  navigator.clipboard.writeText(document.getElementById("output").textContent);
+  alert("Config copied!");
+}
+</script>
+
+</body>
+</html>
