@@ -29,6 +29,8 @@ The configurator allows researchers to define:
 
 ### 📄 Example EMA Configuration Output
 
+Link: "https://regendchui.github.io/EMAapp/"
+
 ```js
 {
   project_Title: "Daily Stress Study",
