@@ -1,0 +1,40 @@
+var contact_Person = "Dr. Cheung";
+var contact_Number = "91234567";
+var project_Title = "Project name";
+var project_Description = "A 3-EMA daily ecological momentary assessment study.";
+var allow_Edit = true;
+
+var EMA1 = {
+  start: 0,
+  duration: 600000,
+  label: "Morning EMA",
+  link: "https://docs.google.com/forms/d/e/1FAIpQLSd9jHt-NWfCbzq0lgiGdKnfOlPOnPy38y0PDpVGZbBVoi9otQ/viewform",
+  notification: [
+    { content: "Morning EMA available now", minutes: 0 },
+    { content: "Reminder: Morning EMA", minutes: 30 }
+  ]
+};
+
+var EMA2 = {
+  start: 0,
+  duration: 600000,
+  label: "Midday EMA",
+  link: "https://hku.au1.qualtrics.com/jfe/form/SV_43fHbiTvotWDLPU",
+  notification: [
+    { content: "Midday EMA is ready", minutes: 0 },
+    { content: "Reminder: Midday EMA", minutes: 45 }
+  ]
+};
+
+var EMA3 = {
+  start: 0,
+  duration: 600000,
+  label: "Evening EMA",
+  link: "https://village.derekslab.com/counselling/",
+  notification: [
+    { content: "Evening EMA available", minutes: 0 },
+    { content: "Reminder: Evening EMA", minutes: 60 }
+  ]
+};
+
+var EMA_sequence = [EMA1, EMA2, EMA3];
