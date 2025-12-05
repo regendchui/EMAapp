@@ -226,10 +226,14 @@ function rebuildNotificationIds(emaId) {
 function generateConfig() {
   let out = "";
 
-  out += `var contact_Person = "${contactPerson.value}";\n`;
-  out += `var contact_Number = "${contactNumber.value}";\n`;
-  out += `var project_Title = "${projectTitle.value}";\n`;
-  out += `var project_Description = "${projectDescription.value.replace(/\n/g, "\\n")}";\n\n`;
+  function esc(str) {
+    return String(str).replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\n/g, "\\n");
+  }
+
+  out += `var contact_Person = "${esc(contactPerson.value)}";\n`;
+  out += `var contact_Number = "${esc(contactNumber.value)}";\n`;
+  out += `var project_Title = "${esc(projectTitle.value)}";\n`;
+  out += `var project_Description = "${esc(projectDescription.value)}";\n\n`;
 
   out += `var allow_Edit = ${allowEdit.value};\n`;
   out += `var close_Finish = ${closeFinish.value};\n`;
@@ -239,33 +243,31 @@ function generateConfig() {
   let emaVars = [];
 
   for (let i = 1; i <= emaCount; i++) {
-    const label = document.getElementById(`emaLabel_${i}`).value;
-    const start = document.getElementById(`emaStart_${i}`).value;
-    const duration = document.getElementById(`emaDuration_${i}`).value;
-    const link = document.getElementById(`emaLink_${i}`).value;
+    const label = esc(document.getElementById(`emaLabel_${i}`).value);
+    const start = Number(document.getElementById(`emaStart_${i}`).value || 0);
+    const duration = Number(document.getElementById(`emaDuration_${i}`).value || 0);
+    const link = esc(document.getElementById(`emaLink_${i}`).value);
 
-    let block = `var EMA${i} = {\n`;
-    block += `  start: ${start},\n`;
-    block += `  duration: ${duration},\n`;
-    block += `  label: "${label}",\n`;
-    block += `  link: "${link}",\n`;
-    block += `  notification: [\n`;
+    const notifBoxes = document
+      .getElementById(`notifContainer_${i}`)
+      .querySelectorAll(".notif-box");
 
-    const notifBoxes = document.getElementById(`notifContainer_${i}`).querySelectorAll(".notif-box");
-    notifBoxes.forEach((box, idx) => {
-      const msg = box.querySelector(`[id^="notifMsg_"]`).value;
-      const min = box.querySelector(`[id^="notifMin_"]`).value;
-      block += `    { content: "${msg}", minutes: ${min} }`;
-      if (idx < notifBoxes.length - 1) block += ",";
-      block += "\n";
+    let notifArr = [];
+
+    notifBoxes.forEach(box => {
+      const msg = esc(box.querySelector(`[id^="notifMsg_"]`).value);
+      const min = Number(box.querySelector(`[id^="notifMin_"]`).value || 0);
+      notifArr.push(`{content:"${msg}",minutes:${min}}`);
     });
 
-    block += "  ]\n};\n\n";
-    out += block;
+    const emaLine =
+`var EMA${i} = {start:${start},duration:${duration},label:"${label}",link:"${link}",notification:[${notifArr.join(",")}]} ;\n`;
+
+    out += emaLine;
     emaVars.push(`EMA${i}`);
   }
 
-  out += `var EMA_sequence = [${emaVars.join(", ")}];\n`;
+  out += `\nvar EMA_sequence = [${emaVars.join(",")}];\n`;
 
   document.getElementById("output").textContent = out;
 
