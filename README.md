@@ -30,21 +30,54 @@ The configurator allows researchers to define:
 ### 📄 Example EMA Configuration Output
 
 Link: "https://regendchui.github.io/EMAapp/"
+You should avoid using the sting "EMA_Index_Number_" in any field of EMA configurator.
 
 ```js
-{
-  project_Title: "Daily Stress Study",
-  project_Description: "14-day EMA on mood and coping",
-  allow_Edit: false,
-  EMA_sequence: [
-    {
-      id: 1,
-      label: "Morning Check-in",
-      link: "https://your-survey-link",
-      time: "09:00"
-    }
+var contact_Person = "Dr. EMA";
+var contact_Number = "12345678";
+var project_Title = "Weight Management";
+var project_Description = "This project is sponsored by seed fund. The IRB number is UW-1234";
+
+var allow_Edit = true;
+var close_Finish = false;
+var display_Progress = false;
+var allow_Revert = false;
+
+var EMA_Index_Number_1 = {
+  start: 6,
+  duration: 180,
+  label: "EMA1 Morning",
+  link: "YOUR_EMA_LINK_1",
+  notification: [
+    { content: "EMA 1: First Message", minutes: 0 },
+    { content: "EMA 1: Second Message", minutes: 1 }
   ]
-}
+};
+
+var EMA_Index_Number_2 = {
+  start: 12,
+  duration: 180,
+  label: "EMA2 Afternoon",
+  link: "YOUR_EMA_LINK_2",
+  notification: [
+    { content: "EMA 2: First Message", minutes: 0 },
+    { content: "EMA 2: Second Message", minutes: 1 }
+  ]
+};
+
+var EMA_Index_Number_3 = {
+  start: 18,
+  duration: 180,
+  label: "EMA3 Night",
+  link: "YOUR_EMA_LINK_3",
+  notification: [
+    { content: "EMA 3: First Message", minutes: 0 },
+    { content: "EMA 3: Second Message", minutes: 1 }
+  ]
+};
+
+var EMA_sequence = [EMA_Index_Number_1, EMA_Index_Number_2, EMA_Index_Number_3];
+
 ```
 
 ## ✅ 2. Load the Config File into the Client App
