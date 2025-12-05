@@ -1,40 +1,44 @@
-var contact_Person = "Dr. Cheung";
-var contact_Number = "91234567";
-var project_Title = "Project name";
-var project_Description = "A 3-EMA daily ecological momentary assessment study.";
+var contact_Person = "Dr. EMA";
+var contact_Number = "12345678";
+var project_Title = "Weight Management";
+var project_Description = "This project is sponsored by seed fund. The IRB number is UW-1234";
+
 var allow_Edit = true;
+var close_Finish = false;
+var display_Progress = false;
+var allow_Revert = false;
 
-var EMA1 = {
-  start: 0,
-  duration: 600000,
-  label: "Morning EMA",
-  link: "https://docs.google.com/forms/d/e/1FAIpQLSd9jHt-NWfCbzq0lgiGdKnfOlPOnPy38y0PDpVGZbBVoi9otQ/viewform",
+var EMA_Index_Number_1 = {
+  start: 6,
+  duration: 180,
+  label: "EMA1 Morning",
+  link: "YOUR_EMA_LINK_1",
   notification: [
-    { content: "Morning EMA available now", minutes: 0 },
-    { content: "Reminder: Morning EMA", minutes: 30 }
+    { content: "EMA 1: First Message", minutes: 0 },
+    { content: "EMA 1: Second Message", minutes: 1 }
   ]
 };
 
-var EMA2 = {
-  start: 0,
-  duration: 600000,
-  label: "Midday EMA",
-  link: "https://hku.au1.qualtrics.com/jfe/form/SV_43fHbiTvotWDLPU",
+var EMA_Index_Number_2 = {
+  start: 12,
+  duration: 180,
+  label: "EMA2 Afternoon",
+  link: "YOUR_EMA_LINK_2",
   notification: [
-    { content: "Midday EMA is ready", minutes: 0 },
-    { content: "Reminder: Midday EMA", minutes: 45 }
+    { content: "EMA 2: First Message", minutes: 0 },
+    { content: "EMA 2: Second Message", minutes: 1 }
   ]
 };
 
-var EMA3 = {
-  start: 0,
-  duration: 600000,
-  label: "Evening EMA",
-  link: "https://village.derekslab.com/counselling/",
+var EMA_Index_Number_3 = {
+  start: 18,
+  duration: 180,
+  label: "EMA3 Night",
+  link: "YOUR_EMA_LINK_3",
   notification: [
-    { content: "Evening EMA available", minutes: 0 },
-    { content: "Reminder: Evening EMA", minutes: 60 }
+    { content: "EMA 3: First Message", minutes: 0 },
+    { content: "EMA 3: Second Message", minutes: 1 }
   ]
 };
 
-var EMA_sequence = [EMA1, EMA2, EMA3];
+var EMA_sequence = [EMA_Index_Number_1, EMA_Index_Number_2, EMA_Index_Number_3];
