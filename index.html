@@ -7,11 +7,71 @@
   <style>
     body { font-family: Arial, sans-serif; padding: 20px; }
     .section { border: 1px solid #ccc; padding: 20px; border-radius: 6px; margin-bottom: 30px; }
-    .ema-box { border: 1px solid #888; padding: 15px; border-radius: 6px; margin-top: 15px; background: #fafafa; }
+    .ema-box, .extra-box { border: 1px solid #888; padding: 15px; border-radius: 6px; margin-top: 15px; background: #fafafa; }
     .notif-box { border: 1px dashed #999; padding: 10px; margin-top: 10px; border-radius: 6px; }
-    button { margin-top: 10px; padding: 8px 14px; cursor: pointer; }
+    button { margin-top: 10px; margin-bottom: 10px; padding: 8px 14px; cursor: pointer; }
     pre { background: #f0f0f0; padding: 10px; border-radius: 6px; white-space: pre-wrap; }
     .remove-btn { background: #ffdddd; color: #aa0000; border: 1px solid red; }
+    .followup-box {
+  border: 1px solid #4a90e2;
+  background: #eef5ff;
+  padding: 15px;
+  border-radius: 8px;
+  margin-top: 15px;
+}
+
+.followup-title {
+  font-weight: bold;
+  color: #2c5aa0;
+  margin-bottom: 10px;
+}
+
+.followup-box label {
+  display: block;
+  margin-top: 10px;
+  font-weight: 600;
+}
+
+.followup-box input {
+  width: 100%;
+  margin-top: 4px;
+}
+
+.followup-notif-card {
+  border: 1px dashed #777;
+  background: #ffffff;
+  padding: 10px;
+  margin-top: 10px;
+  border-radius: 6px;
+}
+
+/* ✅ FOLLOW-UP NOTIFICATION HORIZONTAL LAYOUT */
+.followup-notif-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px dashed #777;
+  background: #ffffff;
+  padding: 10px;
+  margin-top: 10px;
+  border-radius: 6px;
+}
+
+.followup-notif-card label {
+  margin: 0;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.followup-notif-card input {
+  width: 120px;
+}
+
+.followup-notif-card .follow-notif-msg {
+  width: 220px;
+}
+
+
   </style>
 </head>
 
@@ -71,14 +131,6 @@
     </select>
   </div>
 
-  <div style="margin-top: 10px;">
-    <label>Allow Revert Finished EMA</label><br>
-    <select id="allowRevert" style="margin-top: 5px;">
-      <option>true</option>
-      <option>false</option>
-    </select>
-  </div>
-
 </div>
 
 <!-- EMA SECTION -->
@@ -88,22 +140,40 @@
   <button onclick="addEMA()">+ Add EMA</button>
 </div>
 
+<!-- ✅ EXTRA SURVEY SECTION -->
+<div class="section">
+  <h2>3. Extra Questionnaires (Non-EMA)</h2>
+  <div id="extraContainer"></div>
+  <button onclick="addExtra()">+ Add Extra Survey</button>
+</div>
+
+
 <!-- EXPORT -->
 <div class="section">
-  <h2>3. Generate Configuration</h2>
+  <h2>4. Generate Configuration</h2>
   <button onclick="generateConfig()">Generate & Download</button>
   <button onclick="copyConfig()">📋 Copy to Clipboard</button>
+  <h3>Import Existing Config</h3>
+
+  <textarea id="importInput"
+    style="width:100%; height:180px;"
+    placeholder="Paste your existing config here..."></textarea>
+
+  <br>
+  <button onclick="importConfig()">⬆️ Import Config</button>
+
   <pre id="output"></pre>
 </div>
 
 <script>
 let emaCount = 0;
+let extraCount = 0;
 
 /* -----------------------------------------------------
    ADD EMA
 ----------------------------------------------------- */
 function addEMA() {
-  emaCount++;
+  emaCount = document.querySelectorAll("#emaContainer .ema-box").length + 1;
 
   const box = document.createElement("div");
   box.className = "ema-box";
@@ -126,9 +196,30 @@ function addEMA() {
     <label>Survey Link</label>
     <input id="emaLink_${emaCount}" type="text" style="width:100%;">
 
+    <label>Allow Revert?</label>
+    <select id="emaAllowRevert_${emaCount}" style="width:100%;">
+      <option value="true">true</option>
+      <option value="false">false</option>
+    </select>
+
+    <label>Allow Discard?</label>
+    <select id="emaAllowDiscard_${emaCount}" style="width:100%;">
+      <option value="true">true</option>
+      <option value="false">false</option>
+    </select>
+
     <div id="notifContainer_${emaCount}"></div>
 
     <button class="add-notif-btn" onclick="addNotification(${emaCount})">+ Add Notification</button>
+
+    <!-- ✅ ✅ ✅ FOLLOW-UP CONTAINER -->
+    <div id="followUpContainer_${emaCount}"></div>
+
+    <button onclick="addFollowUp(${emaCount}, 'ema')">
+      + Add Follow-up Questionnaire
+    </button>
+
+
   `;
 
   document.getElementById("emaContainer").appendChild(box);
@@ -159,6 +250,8 @@ function rebuildEMAIds() {
     renameField(box, "emaStart", id);
     renameField(box, "emaDuration", id);
     renameField(box, "emaLink", id);
+    renameField(box, "emaAllowRevert", id);
+    renameField(box, "emaAllowDiscard", id);
 
     const notifCont = box.querySelector(`[id^="notifContainer_"]`);
     notifCont.id = `notifContainer_${id}`;
@@ -178,6 +271,8 @@ function renameField(box, prefix, id) {
 /* -----------------------------------------------------
    NOTIFICATIONS
 ----------------------------------------------------- */
+
+
 function addNotification(emaId) {
   const container = document.getElementById(`notifContainer_${emaId}`);
   if (!container) return;
@@ -221,8 +316,331 @@ function rebuildNotificationIds(emaId) {
 }
 
 /* -----------------------------------------------------
+   ✅✅✅ FOLLOW-UP QUESTIONNAIRES (SAFE, REINDEXED)
+----------------------------------------------------- */
+
+function getFollowUpContainer(parentId, type) {
+  return document.getElementById(
+    type === "ema"
+      ? `followUpContainer_${parentId}`
+      : `followUpContainer_extra_${parentId}`
+  );
+}
+
+function addFollowUp(parentId, type) {
+  const container = getFollowUpContainer(parentId, type);
+  if (!container) return;
+
+  const index = container.querySelectorAll(".followup-box").length + 1;
+
+  const box = document.createElement("div");
+  box.className = "followup-box";
+  box.setAttribute("data-followup-id", index);
+
+  box.innerHTML = `
+    <div class="followup-title">Follow-up ${index}</div>
+
+    <button class="remove-btn"
+      onclick="removeFollowUp(${parentId}, ${index}, '${type}')">
+      Remove Follow-up
+    </button>
+
+    <label>Label</label>
+    <input type="text" class="follow-label">
+
+    <label>Start (minutes after completion)</label>
+    <input type="number" class="follow-start">
+
+    <label>Duration (minutes)</label>
+    <input type="number" class="follow-duration">
+
+    <label>Survey Link</label>
+    <input type="text" class="follow-link">
+
+    <label>Allow Revert?</label>
+    <select class="follow-allow-revert">
+      <option value="true">true</option>
+      <option value="false">false</option>
+    </select>
+
+    <label>Allow Discard?</label>
+    <select class="follow-allow-discard">
+      <option value="true">true</option>
+      <option value="false">false</option>
+    </select>
+
+    <div class="follow-notif-container"></div>
+
+    <button style="margin-top:10px;" onclick="addFollowUpNotification(this)">
+      + Add Follow-up Notification
+    </button>
+  `;
+
+  container.appendChild(box);
+}
+
+
+
+/* ✅ DELETE FOLLOW-UP */
+function removeFollowUp(parentId, followId, type) {
+  const container = getFollowUpContainer(parentId, type);
+  const target = container.querySelector(
+    `.followup-box[data-followup-id="${followId}"]`
+  );
+  if (target) target.remove();
+
+  rebuildFollowUps(parentId, type);
+}
+
+/* ✅ FULL REINDEX (CRITICAL FIX) */
+function rebuildFollowUps(parentId, type) {
+  const container = getFollowUpContainer(parentId, type);
+  if (!container) return;
+
+  const boxes = container.querySelectorAll(".followup-box");
+
+  boxes.forEach((box, i) => {
+    const id = i + 1;
+    box.setAttribute("data-followup-id", id);
+    const title = box.querySelector(".followup-title");
+    if (title) title.textContent = `Follow-up ${id}`;
+
+
+    const removeBtn = box.querySelector(".remove-btn");
+    removeBtn.setAttribute(
+      "onclick",
+      `removeFollowUp(${parentId}, ${id}, '${type}')`
+    );
+  });
+}
+
+/* -----------------------------------------------------
+   EXTRA NOTIFICATIONS (SAFE COPY OF EMA SYSTEM)
+----------------------------------------------------- */
+function addExtraNotification(extraId) {
+  const container = document.getElementById(`extraNotifContainer_${extraId}`);
+  if (!container) return;
+
+  const index = container.querySelectorAll(".notif-box").length + 1;
+
+  const box = document.createElement("div");
+  box.className = "notif-box";
+  box.setAttribute("data-notif-id", index);
+
+  box.innerHTML = `
+    <button class="remove-btn" onclick="removeExtraNotification(${extraId}, ${index})">Remove</button>
+    <label>Message</label>
+    <input id="extraNotifMsg_${extraId}_${index}" type="text">
+    <label>Minutes After Start</label>
+    <input id="extraNotifMin_${extraId}_${index}" type="number">
+  `;
+
+  container.appendChild(box);
+}
+
+function removeExtraNotification(extraId, notifId) {
+  const container = document.getElementById(`extraNotifContainer_${extraId}`);
+  if (!container) return;
+
+  const target = container.querySelector(`.notif-box[data-notif-id="${notifId}"]`);
+  if (target) target.remove();
+
+  rebuildExtraNotificationIds(extraId);
+}
+
+function rebuildExtraNotificationIds(extraId) {
+  const container = document.getElementById(`extraNotifContainer_${extraId}`);
+  if (!container) return;
+
+  const boxes = container.querySelectorAll(".notif-box");
+
+  boxes.forEach((box, i) => {
+    const id = i + 1;
+    box.setAttribute("data-notif-id", id);
+    box.querySelector(`[id^="extraNotifMsg_"]`).id = `extraNotifMsg_${extraId}_${id}`;
+    box.querySelector(`[id^="extraNotifMin_"]`).id = `extraNotifMin_${extraId}_${id}`;
+    box.querySelector(".remove-btn")
+      .setAttribute("onclick", `removeExtraNotification(${extraId}, ${id})`);
+  });
+}
+
+/* -----------------------------------------------------
+   ✅✅✅ FOLLOW-UP NOTIFICATIONS (SAFE, REINDEXED)
+----------------------------------------------------- */
+
+function addFollowUpNotification(triggerBtn) {
+  const followBox = triggerBtn.closest(".followup-box");
+  const container = followBox.querySelector(".follow-notif-container");
+
+  const index = container.querySelectorAll(".followup-notif-card").length + 1;
+
+  const box = document.createElement("div");
+  box.className = "followup-notif-card";
+  box.setAttribute("data-follow-notif-id", index);
+
+  box.innerHTML = `
+    <button class="remove-btn"
+      onclick="removeFollowUpNotification(this)">
+      Remove
+    </button>
+
+    <label>Message</label>
+    <input type="text" class="follow-notif-msg">
+
+    <label>Minutes</label>
+    <input type="number" class="follow-notif-min">
+  `;
+
+  container.appendChild(box);
+}
+
+
+/* ✅ DELETE INDIVIDUAL FOLLOW-UP NOTIFICATION */
+function removeFollowUpNotification(btn) {
+  const box = btn.closest(".followup-notif-card"); // ✅ FIXED
+  if (!box) return;
+
+  const container = box.parentElement;
+  box.remove();
+
+  rebuildFollowUpNotifications(container);
+}
+
+
+/* ✅ REINDEX NOTIFS AFTER DELETE */
+function rebuildFollowUpNotifications(container) {
+  const boxes = container.querySelectorAll(".followup-notif-card"); // ✅ FIXED
+
+  boxes.forEach((box, i) => {
+    box.setAttribute("data-follow-notif-id", i + 1);
+  });
+}
+
+
+
+/* -----------------------------------------------------
+   EXTRA SURVEYS
+----------------------------------------------------- */
+function addExtra() {
+  extraCount = document.querySelectorAll("#extraContainer .ema-box").length + 1;
+  extraCount = document.querySelectorAll("#extraContainer .extra-box").length + 1;
+
+  const box = document.createElement("div");
+  box.className = "extra-box";      // ✅ DISTINCT CLASS
+  box.setAttribute("data-extra-id", extraCount);
+
+  box.innerHTML = `
+  <h3>Extra ${extraCount}</h3>
+  <button class="remove-btn" onclick="removeExtra(${extraCount})">Remove</button><br><br>
+
+  <label>Label</label>
+  <input id="extraLabel_${extraCount}" type="text" style="width:100%;">
+
+  <label>Start (hours after commencement date)</label>
+  <input id="extraStart_${extraCount}" type="number" style="width:100%;">
+
+  <label>Duration (minutes)</label>
+  <input id="extraDuration_${extraCount}" type="number" style="width:100%;">
+
+  <label>Survey Link</label>
+  <input id="extraLink_${extraCount}" type="text" style="width:100%;">
+
+  <label>Maximum Attempts (0 = unlimited)</label>
+  <input id="extraLimit_${extraCount}" type="number" value="0" style="width:100%;">
+
+  <label>Cancel Notifications After First Try?</label>
+  <select id="extraCloseAfterTry_${extraCount}" style="width:100%;">
+    <option value="true">true</option>
+    <option value="false">false</option>
+  </select>
+
+  <label>Allow Revert?</label>
+  <select id="extraAllowRevert_${extraCount}" style="width:100%;">
+    <option value="true">true</option>
+    <option value="false">false</option>
+  </select>
+
+  <label>Allow Discard?</label>
+  <select id="extraAllowDiscard_${extraCount}" style="width:100%;">
+    <option value="true">true</option>
+    <option value="false">false</option>
+  </select>
+
+  <!-- ✅ ✅ ✅ EXTRA NOTIFICATION CONTAINER -->
+  <div id="extraNotifContainer_${extraCount}"></div>
+
+  <!-- ✅ ✅ ✅ EXTRA ADD NOTIFICATION BUTTON -->
+  <button class="add-notif-btn" onclick="addExtraNotification(${extraCount})">
+    + Add Notification
+  </button>
+
+  <!-- ✅ ✅ ✅ FOLLOW-UP CONTAINER -->
+  <div id="followUpContainer_extra_${extraCount}"></div>
+
+  <button onclick="addFollowUp(${extraCount}, 'extra')">
+    + Add Follow-up Questionnaire
+  </button>
+
+`;
+
+
+  document.getElementById("extraContainer").appendChild(box);
+}
+
+function removeExtra(id) {
+  const elem = document.querySelector(`.extra-box[data-extra-id="${id}"]`);
+  if (elem) elem.remove();
+  rebuildExtraIds();
+}
+
+function rebuildExtraIds() {
+  const boxes = document.querySelectorAll("#extraContainer .extra-box");
+
+  extraCount = 0;
+
+  boxes.forEach((box, i) => {
+    extraCount = i + 1;
+    const id = extraCount;
+
+    box.setAttribute("data-extra-id", id);
+    box.querySelector("h3").textContent = `Extra Survey ${id}`;
+
+    // ✅ Remove button
+    box.querySelector(".remove-btn")
+      .setAttribute("onclick", `removeExtra(${id})`);
+
+    // ✅ Rename main fields
+    box.querySelector(`[id^="extraLabel_"]`).id = `extraLabel_${id}`;
+    box.querySelector(`[id^="extraStart_"]`).id = `extraStart_${id}`;
+    box.querySelector(`[id^="extraDuration_"]`).id = `extraDuration_${id}`;
+    box.querySelector(`[id^="extraLink_"]`).id = `extraLink_${id}`;
+    box.querySelector(`[id^="extraLimit_"]`).id = `extraLimit_${id}`;
+    box.querySelector(`[id^="extraCloseAfterTry_"]`).id = `extraCloseAfterTry_${id}`;
+    box.querySelector(`[id^="extraAllowRevert_"]`).id = `extraAllowRevert_${id}`;
+    box.querySelector(`[id^="extraAllowDiscard_"]`).id = `extraAllowDiscard_${id}`;
+
+    // ✅ ✅ ✅ FIX EXTRA NOTIFICATION CONTAINER ID
+    const notifContainer = box.querySelector(`[id^="extraNotifContainer_"]`);
+    if (notifContainer) {
+      notifContainer.id = `extraNotifContainer_${id}`;
+    }
+
+    // ✅ ✅ ✅ FIX ADD-NOTIFICATION BUTTON BINDING
+    const addBtn = box.querySelector(".add-notif-btn");
+    if (addBtn) {
+      addBtn.setAttribute("onclick", `addExtraNotification(${id})`);
+    }
+
+    // ✅ ✅ ✅ REBUILD EXISTING EXTRA NOTIFICATIONS
+    rebuildExtraNotificationIds(id);
+  });
+}
+
+
+/* -----------------------------------------------------
    GENERATE CONFIG
 ----------------------------------------------------- */
+
 function generateConfig() {
   let out = "";
 
@@ -233,18 +651,21 @@ function generateConfig() {
 
   out += `var allow_Edit = ${allowEdit.value};\n`;
   out += `var close_Finish = ${closeFinish.value};\n`;
-  out += `var display_Progress = ${displayProgress.value};\n`;
-  out += `var allow_Revert = ${allowRevert.value};\n\n`;
+  out += `var display_Progress = ${displayProgress.value};\n\n`;
 
   let emaVars = [];
 
+  /* ================================
+     ✅ ✅ ✅ EMA EXPORT
+  ================================= */
   for (let i = 1; i <= emaCount; i++) {
     const label = document.getElementById(`emaLabel_${i}`).value;
     const start = document.getElementById(`emaStart_${i}`).value;
     const duration = document.getElementById(`emaDuration_${i}`).value;
     const link = document.getElementById(`emaLink_${i}`).value;
+    const allowRevert = document.getElementById(`emaAllowRevert_${i}`)?.value === "true";
+    const allowDiscard = document.getElementById(`emaAllowDiscard_${i}`)?.value === "true";
 
-    // ✅ ✅ ✅ SAFE VARIABLE NAME
     let varName = `EMA_Index_Number_${i}`;
     emaVars.push(varName);
 
@@ -253,6 +674,10 @@ function generateConfig() {
     block += `  duration: ${duration},\n`;
     block += `  label: "${label}",\n`;
     block += `  link: "${link}",\n`;
+    block += `  allow_Revert: ${allowRevert},\n`;
+    block += `  allow_Discard: ${allowDiscard},\n`;
+
+    /* ✅ 1️⃣ EMA NOTIFICATIONS */
     block += `  notification: [\n`;
 
     const notifBoxes = document
@@ -260,19 +685,168 @@ function generateConfig() {
       .querySelectorAll(".notif-box");
 
     notifBoxes.forEach((box, idx) => {
-      const msg = box.querySelector(`[id^="notifMsg_"]`).value;
-      const min = box.querySelector(`[id^="notifMin_"]`).value;
+    const msg = box.querySelector(`[id^="notifMsg_"]`)?.value || "";
+    const min = box.querySelector(`[id^="notifMin_"]`)?.value || 0;
+
+
       block += `    { content: "${msg}", minutes: ${min} }`;
       if (idx < notifBoxes.length - 1) block += ",";
       block += "\n";
     });
 
-    block += "  ]\n};\n\n";
+    block += `  ],\n`;
+
+    /* ✅ 2️⃣ EMA FOLLOW-UPS */
+    block += `  followUp: [\n`;
+
+    const followBoxes = document
+      .getElementById(`followUpContainer_${i}`)
+      ?.querySelectorAll(".followup-box") || [];
+
+    followBoxes.forEach((fbox, fid) => {
+      const start = fbox.querySelector(".follow-start")?.value;
+      const duration = fbox.querySelector(".follow-duration")?.value;
+      const flabel = fbox.querySelector(".follow-label")?.value;
+      const flink = fbox.querySelector(".follow-link")?.value;
+      const allowRevertFU = fbox.querySelector(".follow-allow-revert")?.value === "true";
+      const allowDiscardFU = fbox.querySelector(".follow-allow-discard")?.value === "true";
+
+      block += `    {\n`;
+      block += `      start: ${start},\n`;
+      block += `      duration: ${duration},\n`;
+      block += `      label: "${flabel}",\n`;
+      block += `      link: "${flink}",\n`;
+      block += `      allow_Revert: ${allowRevertFU},\n`;
+      block += `      allow_Discard: ${allowDiscardFU},\n`;
+      block += `      notification: [\n`;
+
+      const fnotifBoxes = fbox
+        .querySelector(".follow-notif-container")
+        ?.querySelectorAll(".followup-notif-card") || [];
+
+      fnotifBoxes.forEach((nbox, nidx) => {
+        const msg = nbox.querySelector(".follow-notif-msg")?.value;
+        const min = nbox.querySelector(".follow-notif-min")?.value;
+
+        block += `        { content: "${msg}", minutes: ${min} }`;
+        if (nidx < fnotifBoxes.length - 1) block += ",";
+        block += "\n";
+      });
+
+      block += `      ]\n`;
+      block += `    }`;
+
+      if (fid < followBoxes.length - 1) block += ",";
+      block += "\n";
+    });
+
+    block += `  ]\n`;
+    block += `};\n\n`;
+
     out += block;
   }
 
-  // ✅ ✅ ✅ FINAL SAFE SEQUENCE
-  out += `var EMA_sequence = [${emaVars.join(", ")}];\n`;
+  out += `var EMA_sequence = [${emaVars.join(", ")}];\n\n`;
+
+  /* ================================
+     ✅ ✅ ✅ EXTRA EXPORT
+  ================================= */
+  let extraVars = [];
+  const extraBoxes = document.querySelectorAll("#extraContainer .extra-box");
+
+  extraBoxes.forEach((box, idx) => {
+    const i = idx + 1;
+
+    const label = document.getElementById(`extraLabel_${i}`)?.value;
+    const start = document.getElementById(`extraStart_${i}`)?.value;
+    const duration = document.getElementById(`extraDuration_${i}`)?.value;
+    const link = document.getElementById(`extraLink_${i}`)?.value;
+    const limit = document.getElementById(`extraLimit_${i}`)?.value || 0;
+    const closeAfterTry = document.getElementById(`extraCloseAfterTry_${i}`)?.value === "true";
+    const allowRevert = document.getElementById(`extraAllowRevert_${i}`)?.value === "true";
+    const allowDiscard = document.getElementById(`extraAllowDiscard_${i}`)?.value === "true";
+
+    let varName = `Extra_Index_Number_${i}`;
+    extraVars.push(varName);
+
+    out += `var ${varName} = {\n`;
+    out += `  start: ${start},\n`;
+    out += `  duration: ${duration},\n`;
+    out += `  label: "${label}",\n`;
+    out += `  link: "${link}",\n`;
+    out += `  limit: ${limit},\n`;
+    out += `  notification_Close_AfterTry: ${closeAfterTry},\n`;
+    out += `  allow_Revert: ${allowRevert},\n`;
+    out += `  allow_Discard: ${allowDiscard},\n`;
+
+    /* ✅ EXTRA NOTIFICATIONS */
+    out += `  notification: [\n`;
+
+    const notifBoxes = document
+      .getElementById(`extraNotifContainer_${i}`)
+      ?.querySelectorAll(".notif-box") || [];
+
+    notifBoxes.forEach((box, idx) => {
+    const msg = box.querySelector(`[id^="extraNotifMsg_"]`)?.value || "";
+    const min = box.querySelector(`[id^="extraNotifMin_"]`)?.value || 0;
+
+
+      out += `    { content: "${msg}", minutes: ${min} }`;
+      if (idx < notifBoxes.length - 1) out += ",";
+      out += "\n";
+    });
+
+    out += `  ],\n`;
+
+    /* ✅ EXTRA FOLLOW-UPS */
+    out += `  followUp: [\n`;
+
+    const followBoxes = document
+      .getElementById(`followUpContainer_extra_${i}`)
+      ?.querySelectorAll(".followup-box") || [];
+
+    followBoxes.forEach((fbox, fid) => {
+      const start = fbox.querySelector(".follow-start")?.value;
+      const duration = fbox.querySelector(".follow-duration")?.value;
+      const flabel = fbox.querySelector(".follow-label")?.value;
+      const flink = fbox.querySelector(".follow-link")?.value;
+      const allowRevertFU = fbox.querySelector(".follow-allow-revert")?.value === "true";
+      const allowDiscardFU = fbox.querySelector(".follow-allow-discard")?.value === "true";
+
+      out += `    {\n`;
+      out += `      start: ${start},\n`;
+      out += `      duration: ${duration},\n`;
+      out += `      label: "${flabel}",\n`;
+      out += `      link: "${flink}",\n`;
+      out += `      allow_Revert: ${allowRevertFU},\n`;
+      out += `      allow_Discard: ${allowDiscardFU},\n`;
+      out += `      notification: [\n`;
+
+      const fnotifBoxes = fbox
+        .querySelector(".follow-notif-container")
+        ?.querySelectorAll(".followup-notif-card") || [];
+
+      fnotifBoxes.forEach((nbox, nidx) => {
+        const msg = nbox.querySelector(".follow-notif-msg")?.value;
+        const min = nbox.querySelector(".follow-notif-min")?.value;
+
+        out += `        { content: "${msg}", minutes: ${min} }`;
+        if (nidx < fnotifBoxes.length - 1) out += ",";
+        out += "\n";
+      });
+
+      out += `      ]\n`;
+      out += `    }`;
+
+      if (fid < followBoxes.length - 1) out += ",";
+      out += "\n";
+    });
+
+    out += `  ]\n`;
+    out += `};\n\n`;
+  });
+
+  out += `var Extra_sequence = [${extraVars.join(", ")}];\n`;
 
   document.getElementById("output").textContent = out;
 
@@ -291,6 +865,189 @@ function copyConfig() {
   navigator.clipboard.writeText(document.getElementById("output").textContent);
   alert("Config copied!");
 }
+
+function importConfig() {
+  const raw = document.getElementById("importInput").value.trim();
+  if (!raw) {
+    alert("Please paste a config first.");
+    return;
+  }
+
+  try {
+    // ✅ 1️⃣ Execute config in a TEMP isolated function scope
+    const exec = new Function(`
+      ${raw}
+
+      return {
+        contact_Person,
+        contact_Number,
+        project_Title,
+        project_Description,
+        allow_Edit,
+        close_Finish,
+        display_Progress,
+        EMA_sequence,
+        Extra_sequence
+      };
+    `);
+
+    const cfg = exec(); // ✅ This now WORKS with var-based configs
+
+    // ✅ 2️⃣ HARD VALIDATION
+    if (!Array.isArray(cfg.EMA_sequence)) {
+      throw new Error("EMA_sequence is missing or invalid");
+    }
+
+    if (!Array.isArray(cfg.Extra_sequence)) {
+      throw new Error("Extra_sequence is missing or invalid");
+    }
+
+    // ✅ 3️⃣ Rebuild UI from imported config
+    rebuildFromConfig(cfg);
+
+    alert("✅ Config imported successfully!");
+
+  } catch (err) {
+    console.error("❌ Import failed:", err);
+    alert("❌ Invalid config format.\n\n" + err.message);
+  }
+}
+
+
+function rebuildFromConfig(cfg) {
+  // ✅ RESET UI
+  document.getElementById("emaContainer").innerHTML = "";
+  document.getElementById("extraContainer").innerHTML = "";
+  emaCount = 0;
+  extraCount = 0;
+
+  // ✅ PROJECT INFO
+  contactPerson.value = cfg.contact_Person || "";
+  contactNumber.value = cfg.contact_Number || "";
+  projectTitle.value = cfg.project_Title || "";
+  projectDescription.value = (cfg.project_Description || "").replace(/\\n/g, "\n");
+  allowEdit.value = String(cfg.allow_Edit ?? true);
+  closeFinish.value = String(cfg.close_Finish ?? true);
+  displayProgress.value = String(cfg.display_Progress ?? true);
+
+  // ✅ EMA REBUILD
+  (cfg.EMA_sequence || []).forEach((ema, i) => {
+    addEMA();
+
+    const id = i + 1;
+    document.getElementById(`emaLabel_${id}`).value = ema.label;
+    document.getElementById(`emaStart_${id}`).value = ema.start;
+    document.getElementById(`emaDuration_${id}`).value = ema.duration;
+    document.getElementById(`emaLink_${id}`).value = ema.link;
+    if (ema.allow_Revert !== undefined) {
+      document.getElementById(`emaAllowRevert_${id}`).value = String(ema.allow_Revert);
+    }
+    if (ema.allow_Discard !== undefined) {
+      document.getElementById(`emaAllowDiscard_${id}`).value = String(ema.allow_Discard);
+    }
+
+    // ✅ EMA NOTIFICATIONS
+    ema.notification?.forEach(n => {
+      addNotification(id);
+      const box = document.querySelector(`#notifContainer_${id} .notif-box:last-child`);
+      box.querySelector(`[id^="notifMsg_"]`).value = n.content;
+      box.querySelector(`[id^="notifMin_"]`).value = n.minutes;
+    });
+
+    // ✅ EMA FOLLOW-UPS
+    ema.followUp?.forEach(fu => {
+      addFollowUp(id, "ema");
+
+      const fbox = document.querySelector(`#followUpContainer_${id} .followup-box:last-child`);
+      fbox.querySelector(".follow-start").value = fu.start;
+      fbox.querySelector(".follow-duration").value = fu.duration;
+      fbox.querySelector(".follow-label").value = fu.label;
+      fbox.querySelector(".follow-link").value = fu.link;
+
+      if (fu.allow_Revert !== undefined) {
+        fbox.querySelector(".follow-allow-revert").value = String(fu.allow_Revert);
+      }
+
+      if (fu.allow_Discard !== undefined) {
+        fbox.querySelector(".follow-allow-discard").value = String(fu.allow_Discard);
+      }
+
+      // ✅ FOLLOW-UP NOTIFICATIONS
+      fu.notification?.forEach(n => {
+        addFollowUpNotification(
+          fbox.querySelector("button[onclick^='addFollowUpNotification']")
+        );
+
+        const nbox = fbox.querySelector(".follow-notif-container .followup-notif-card:last-child");
+
+        nbox.querySelector(".follow-notif-msg").value = n.content;
+        nbox.querySelector(".follow-notif-min").value = n.minutes;
+      });
+    });
+  });
+
+  // ✅ EXTRA REBUILD
+  (cfg.Extra_sequence || []).forEach((extra, i) => {
+    addExtra();
+
+    const id = i + 1;
+    document.getElementById(`extraLabel_${id}`).value = extra.label;
+    document.getElementById(`extraStart_${id}`).value = extra.start;
+    document.getElementById(`extraDuration_${id}`).value = extra.duration;
+    document.getElementById(`extraLink_${id}`).value = extra.link;
+
+    if (extra.limit !== undefined) {
+      document.getElementById(`extraLimit_${id}`).value = extra.limit;
+    }
+
+    if (extra.notification_Close_AfterTry !== undefined) {
+      document.getElementById(`extraCloseAfterTry_${id}`).value = String(extra.notification_Close_AfterTry);
+    }
+
+    if (extra.allow_Revert !== undefined) {
+      document.getElementById(`extraAllowRevert_${id}`).value = String(extra.allow_Revert);
+    }
+
+    if (extra.allow_Discard !== undefined) {
+      document.getElementById(`extraAllowDiscard_${id}`).value = String(extra.allow_Discard);
+    }
+
+    // ✅ EXTRA NOTIFICATIONS
+    extra.notification?.forEach(n => {
+      addExtraNotification(id);
+      const box = document.querySelector(`#extraNotifContainer_${id} .notif-box:last-child`);
+      box.querySelector(`[id^="extraNotifMsg_"]`).value = n.content;
+      box.querySelector(`[id^="extraNotifMin_"]`).value = n.minutes;
+    });
+
+    // ✅ EXTRA FOLLOW-UPS
+    extra.followUp?.forEach(fu => {
+      addFollowUp(id, "extra");
+
+      const fbox = document.querySelector(`#followUpContainer_extra_${id} .followup-box:last-child`);
+      fbox.querySelector(".follow-start").value = fu.start;
+      fbox.querySelector(".follow-duration").value = fu.duration;
+      fbox.querySelector(".follow-label").value = fu.label;
+      fbox.querySelector(".follow-link").value = fu.link;
+
+      if (fu.allow_Revert !== undefined) {
+        fbox.querySelector(".follow-allow-revert").value = String(fu.allow_Revert);
+      }
+
+      if (fu.allow_Discard !== undefined) {
+        fbox.querySelector(".follow-allow-discard").value = String(fu.allow_Discard);
+      }
+
+      fu.notification?.forEach(n => {
+        addFollowUpNotification(fbox.querySelector("button:last-child"));
+        const nbox = fbox.querySelector(".follow-notif-container .followup-notif-card:last-child");
+        nbox.querySelector(".follow-notif-msg").value = n.content;
+        nbox.querySelector(".follow-notif-min").value = n.minutes;
+      });
+    });
+  });
+}
+
 </script>
 
 </body>
