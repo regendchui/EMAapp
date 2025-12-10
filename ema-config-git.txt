@@ -6,171 +6,170 @@ var project_Description = "This is an EMA project";
 var allow_Edit = true;
 var close_Finish = true;
 var display_Progress = true;
-
 var EMA_Index_Number_1 = {
-  start: 0,
-  duration: 60000,
-  label: "EMA 1",
-  link: "https://docs.google.com/forms/d/e/1FAIpQLSd9jHt-NWfCbzq0lgiGdKnfOlPOnPy38y0PDpVGZbBVoi9otQ/viewform",
-  allow_Revert: true,
-  allow_Discard: true,
-  notification: [
-    { content: "EMA 1 Noti 1", minutes: 0 },
-    { content: "EMA 1 Noti 2", minutes: 3 }
-  ],
-  followUp: [
-    {
-      start: 0,
-      duration: 60000,
-      label: "EMA 1 FU 1",
-      link: "https://docs.google.com/forms/d/e/1FAIpQLSd9jHt-NWfCbzq0lgiGdKnfOlPOnPy38y0PDpVGZbBVoi9otQ/viewform",
-      allow_Revert: true,
-      allow_Discard: true,
-      notification: [
-        { content: "EMA 1 FU 1 Noti 1", minutes: 0 },
-        { content: "EMA 1 FU 1 Noti 2", minutes: 1 }
-      ]
-    },
-    {
-      start: 5,
-      duration: 60000,
-      label: "EMA 1 FU 2",
-      link: "https://docs.google.com/forms/d/e/1FAIpQLSd9jHt-NWfCbzq0lgiGdKnfOlPOnPy38y0PDpVGZbBVoi9otQ/viewform",
-      allow_Revert: true,
-      allow_Discard: true,
-      notification: [
-        { content: "EMA 1 FU 2 Noti 1", minutes: 0 },
-        { content: "EMA 1 FU 2 Noti 2", minutes: 1 }
-      ]
-    }
-  ]
+  start: 0,
+  duration: 60000,
+  label: "EMA 1",
+  link: "https://docs.google.com/forms/d/e/1FAIpQLSd9jHt-NWfCbzq0lgiGdKnfOlPOnPy38y0PDpVGZbBVoi9otQ/viewform",
+  allow_Revert: true,
+  allow_Discard: true,
+  notification: [
+    { content: "EMA 1 Noti 1", minutes: 0 },
+    { content: "EMA 1 Noti 2", minutes: 3 }
+  ],
+  followUp: [
+    {
+      start: 0,
+      duration: 60000,
+      label: "EMA 1 FU 1",
+      link: "https://docs.google.com/forms/d/e/1FAIpQLSd9jHt-NWfCbzq0lgiGdKnfOlPOnPy38y0PDpVGZbBVoi9otQ/viewform",
+      allow_Revert: true,
+      allow_Discard: true,
+      notification: [
+        { content: "EMA 1 FU 1 Noti 1", minutes: 0 },
+        { content: "EMA 1 FU 1 Noti 2", minutes: 1 }
+      ]
+    },
+    {
+      start: 5,
+      duration: 60000,
+      label: "EMA 1 FU 2",
+      link: "https://docs.google.com/forms/d/e/1FAIpQLSd9jHt-NWfCbzq0lgiGdKnfOlPOnPy38y0PDpVGZbBVoi9otQ/viewform",
+      allow_Revert: true,
+      allow_Discard: true,
+      notification: [
+        { content: "EMA 1 FU 2 Noti 1", minutes: 0 },
+        { content: "EMA 1 FU 2 Noti 2", minutes: 1 }
+      ]
+    }
+  ]
 };
 
 var EMA_Index_Number_2 = {
-  start: 0,
-  duration: 60000,
-  label: "EMA 2",
-  link: "https://hku.au1.qualtrics.com/jfe/form/SV_43fHbiTvotWDLPU",
-  allow_Revert: true,
-  allow_Discard: true,
-  notification: [
-    { content: "EMA 2 Noti 1", minutes: 0 },
-    { content: "EMA 2 Noti 2", minutes: 3 }
-  ],
-  followUp: [
-    {
-      start: 0,
-      duration: 60000,
-      label: "EMA 2 FU 1",
-      link: "https://hku.au1.qualtrics.com/jfe/form/SV_43fHbiTvotWDLPU",
-      allow_Revert: true,
-      allow_Discard: true,
-      notification: [
-        { content: "EMA 2 FU 1 Noti 1", minutes: 0 },
-        { content: "EMA 2 FU 1 Noti 2", minutes: 1 }
-      ]
-    }
-  ]
+  start: 0,
+  duration: 60000,
+  label: "EMA 2",
+  link: "https://hku.au1.qualtrics.com/jfe/form/SV_43fHbiTvotWDLPU",
+  allow_Revert: true,
+  allow_Discard: true,
+  notification: [
+    { content: "EMA 2 Noti 1", minutes: 0 },
+    { content: "EMA 2 Noti 2", minutes: 3 }
+  ],
+  followUp: [
+    {
+      start: 0,
+      duration: 60000,
+      label: "EMA 2 FU 1",
+      link: "https://hku.au1.qualtrics.com/jfe/form/SV_43fHbiTvotWDLPU",
+      allow_Revert: true,
+      allow_Discard: true,
+      notification: [
+        { content: "EMA 2 FU 1 Noti 1", minutes: 0 },
+        { content: "EMA 2 FU 1 Noti 2", minutes: 1 }
+      ]
+    }
+  ]
 };
 
 var EMA_Index_Number_3 = {
-  start: 0,
-  duration: 60000,
-  label: "EMA 3",
-  link: "https://village.derekslab.com/counselling/",
-  allow_Revert: true,
-  allow_Discard: true,
-  notification: [
-  ],
-  followUp: [
-  ]
+  start: 0,
+  duration: 60000,
+  label: "EMA 3",
+  link: "https://village.derekslab.com/counselling/",
+  allow_Revert: true,
+  allow_Discard: true,
+  notification: [
+  ],
+  followUp: [
+  ]
 };
 
 var EMA_sequence = [EMA_Index_Number_1, EMA_Index_Number_2, EMA_Index_Number_3];
 
 var Extra_Index_Number_1 = {
-  start: 0,
-  duration: 60000,
-  label: "Extra 1",
-  link: "https://docs.google.com/forms/d/e/1FAIpQLSd9jHt-NWfCbzq0lgiGdKnfOlPOnPy38y0PDpVGZbBVoi9otQ/viewform",
-  limit: 3,
-  notification_Close_AfterTry: true,
-  allow_Revert: true,
-  allow_Discard: true,
-  notification: [
-    { content: "Extra 1 Noti 1", minutes: 0 },
-    { content: "Extra 1 Noti 2", minutes: 3 }
-  ],
-  followUp: [
-    {
-      start: 0,
-      duration: 60000,
-      label: "Extra 1 FU 1",
-      link: "https://docs.google.com/forms/d/e/1FAIpQLSd9jHt-NWfCbzq0lgiGdKnfOlPOnPy38y0PDpVGZbBVoi9otQ/viewform",
-      allow_Revert: true,
-      allow_Discard: true,
-      notification: [
-        { content: "Extra 1 FU 1 Noti 1", minutes: 0 },
-        { content: "Extra 1 FU 1 Noti 2", minutes: 1 }
-      ]
-    },
-    {
-      start: 0,
-      duration: 60000,
-      label: "Extra 1 FU 2",
-      link: "https://docs.google.com/forms/d/e/1FAIpQLSd9jHt-NWfCbzq0lgiGdKnfOlPOnPy38y0PDpVGZbBVoi9otQ/viewform",
-      allow_Revert: true,
-      allow_Discard: true,
-      notification: [
-        { content: "Extra 1 FU 1 Noti 1", minutes: 0 },
-        { content: "Extra 1 FU 1 Noti 2", minutes: 1 }
-      ]
-    }
-  ]
+  start: 0,
+  duration: 60000,
+  label: "Extra 1",
+  link: "https://docs.google.com/forms/d/e/1FAIpQLSd9jHt-NWfCbzq0lgiGdKnfOlPOnPy38y0PDpVGZbBVoi9otQ/viewform",
+  limit: 3,
+  notification_Close_AfterTry: true,
+  allow_Revert: true,
+  allow_Discard: true,
+  notification: [
+    { content: "Extra 1 Noti 1", minutes: 0 },
+    { content: "Extra 1 Noti 2", minutes: 3 }
+  ],
+  followUp: [
+    {
+      start: 0,
+      duration: 60000,
+      label: "Extra 1 FU 1",
+      link: "https://docs.google.com/forms/d/e/1FAIpQLSd9jHt-NWfCbzq0lgiGdKnfOlPOnPy38y0PDpVGZbBVoi9otQ/viewform",
+      allow_Revert: true,
+      allow_Discard: true,
+      notification: [
+        { content: "Extra 1 FU 1 Noti 1", minutes: 0 },
+        { content: "Extra 1 FU 1 Noti 2", minutes: 1 }
+      ]
+    },
+    {
+      start: 0,
+      duration: 60000,
+      label: "Extra 1 FU 2",
+      link: "https://docs.google.com/forms/d/e/1FAIpQLSd9jHt-NWfCbzq0lgiGdKnfOlPOnPy38y0PDpVGZbBVoi9otQ/viewform",
+      allow_Revert: true,
+      allow_Discard: true,
+      notification: [
+        { content: "Extra 1 FU 1 Noti 1", minutes: 0 },
+        { content: "Extra 1 FU 1 Noti 2", minutes: 1 }
+      ]
+    }
+  ]
 };
 
 var Extra_Index_Number_2 = {
-  start: 0,
-  duration: 60000,
-  label: "Extra 2",
-  link: "https://hku.au1.qualtrics.com/jfe/form/SV_43fHbiTvotWDLPU",
-  limit: 0,
-  notification_Close_AfterTry: true,
-  allow_Revert: true,
-  allow_Discard: true,
-  notification: [
-    { content: "Extra 2 Noti 1", minutes: 0 },
-    { content: "Extra 2 Noti 2", minutes: 3 }
-  ],
-  followUp: [
-    {
-      start: 0,
-      duration: 60000,
-      label: "Extra 2 FU 1",
-      link: "https://hku.au1.qualtrics.com/jfe/form/SV_43fHbiTvotWDLPU",
-      allow_Revert: true,
-      allow_Discard: true,
-      notification: [
-        { content: "Extra 2 FU 1 Noti 1", minutes: 0 },
-        { content: "Extra 2 FU 1 Noti 2", minutes: 1 }
-      ]
-    }
-  ]
+  start: 0,
+  duration: 60000,
+  label: "Extra 2",
+  link: "https://hku.au1.qualtrics.com/jfe/form/SV_43fHbiTvotWDLPU",
+  limit: 0,
+  notification_Close_AfterTry: true,
+  allow_Revert: true,
+  allow_Discard: true,
+  notification: [
+    { content: "Extra 2 Noti 1", minutes: 0 },
+    { content: "Extra 2 Noti 2", minutes: 3 }
+  ],
+  followUp: [
+    {
+      start: 0,
+      duration: 60000,
+      label: "Extra 2 FU 1",
+      link: "https://hku.au1.qualtrics.com/jfe/form/SV_43fHbiTvotWDLPU",
+      allow_Revert: true,
+      allow_Discard: true,
+      notification: [
+        { content: "Extra 2 FU 1 Noti 1", minutes: 0 },
+        { content: "Extra 2 FU 1 Noti 2", minutes: 1 }
+      ]
+    }
+  ]
 };
 
 var Extra_Index_Number_3 = {
-  start: 0,
-  duration: 60000,
-  label: "Extra 3",
-  link: "https://village.derekslab.com/counselling/",
-  limit: 1,
-  notification_Close_AfterTry: true,
-  allow_Revert: true,
-  allow_Discard: true,
-  notification: [
-  ],
-  followUp: [
-  ]
+  start: 0,
+  duration: 60000,
+  label: "Extra 3",
+  link: "https://youth-qmethod.derekslab.com/test/",
+  limit: 1,
+  notification_Close_AfterTry: true,
+  allow_Revert: true,
+  allow_Discard: true,
+  notification: [
+  ],
+  followUp: [
+  ]
 };
 
 var Extra_sequence = [Extra_Index_Number_1, Extra_Index_Number_2, Extra_Index_Number_3];
